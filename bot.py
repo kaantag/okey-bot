@@ -1,5 +1,5 @@
 import logging
-from telegram import Update
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from game import OkeyGame
 from config import TOKEN
@@ -7,6 +7,8 @@ from tile_renderer import draw_hand
 
 logging.basicConfig(level=logging.INFO)
 games = {}
+
+WEB_APP_URL = "https://kaantag.github.io/okey-bot"
 
 async def send_hand(context, player, game):
     if player.is_bot:
@@ -20,6 +22,8 @@ async def announce(context, chat_id, text):
     await context.bot.send_message(chat_id, text)
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [[InlineKeyboardButton("🎮 Oyna!", web_app=WebAppInfo(url=WEB_APP_URL))]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(
         "🎮 101 Okey Botuna Hoş Geldin!\n\n"
         "/yenioxun — Yeni oyun başlat\n"
@@ -29,7 +33,8 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/at <n> — Taş at\n"
         "/cek — Desteden taş çek\n"
         "/cop — Çöpten taş al\n"
-        "/skor — Skorları gör"
+        "/skor — Skorları gör",
+        reply_markup=reply_markup
     )
 
 async def cmd_yeni(update: Update, context: ContextTypes.DEFAULT_TYPE):
