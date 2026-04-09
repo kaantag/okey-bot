@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>101 Okey</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a2e;
+            color: white;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+        }
+        .header {
+            background: #16213e;
+            padding: 15px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            color: #e94560;
+        }
+        .game-info {
+            background: #0f3460;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        .joker-info {
+            background: #533483;
+            padding: 8px 15px;
+            text-align: center;
+            font-size: 16px;
+        }
+        .tiles-container {
+            padding: 15px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .tile {
+            display: inline-block;
+            width: 55px;
+            height: 75px;
+            background: #f5e6c8;
+            border-radius: 8px;
+            margin: 4px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid #ccc;
+            position: relative;
+            vertical-align: top;
+            transition: transform 0.2s;
+        }
+        .tile:active { transform: scale(0.95); }
+        .tile.selected {
+            border: 3px solid #e94560;
+            transform: translateY(-10px);
+        }
+        .tile.joker-tile { background: #e8d5ff; border-color: #9b59b6; }
+        .tile-number {
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .tile-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .tile-index {
+            font-size: 10px;
+            color: #999;
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .red { color: #e74c3c; }
+        .blue { color: #3498db; }
+        .black { color: #2c3e50; }
+        .yellow { color: #f39c12; }
+        .dot-red { background: #e74c3c; }
+        .dot-blue { background: #3498db; }
+        .dot-black { background: #2c3e50; }
+        .dot-yellow { background: #f39c12; }
+        .dot-joker { background: #9b59b6; }
+        .actions {
+            padding: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-draw { background: #27ae60; color: white; }
+        .btn-discard { background: #e74c3c; color: white; }
+        .btn-trash { background: #e67e22; color: white; }
+        .btn-declare { background: #9b59b6; color: white; }
+        .status {
+            background: #16213e;
+            padding: 10px 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #aaa;
+        }
+        .discard-pile {
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        .discard-pile span { color: #aaa; }
+    </style>
+</head>
+<body>
+    <div class="header">🎮 101 Okey</div>
+    <div class="game-info">
+        <span id="turn-info">Sıra: Yükleniyor...</span>
+        <span id="tile-count">Deste: -</span>
+    </div>
+    <div class="joker-info" id="joker-info">🃏 Joker: -</div>
+    <div class="status" id="status">Oyun bekleniyor...</div>
+    <div class="discard-pile">
+        <span>Çöp: </span>
+        <span id="discard-top">-</span>
+    </div>
+    <div class="tiles-container" id="tiles"></div>
+    <div class="actions">
+        <button class="btn btn-draw" onclick="drawTile()">📥 Taş Çek</button>
+        <button class="btn btn-trash" onclick="takeDiscard()">♻️ Çöpten Al</button>
+        <button class="btn btn-discard" onclick="discardTile()">🗑 Taş At</button>
+        <button class="btn btn-declare" onclick="declareOkey()">🏆 Okey!</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let selectedTile = null;
+        let gameData = null;
+
+        const colorMap = {
+            "🔴": "red", "🔵": "blue", "⚫": "black", "🟡": "yellow"
+        };
+        const dotMap = {
+            "🔴": "dot-red", "🔵": "dot-blue", "⚫": "dot-black", "🟡": "dot-yellow"
+        };
+
+        function renderTiles(hand) {
+            const container = document.getElementById("tiles");
+            container.innerHTML = "";
+            hand.forEach((tile, i) => {
+                const div = document.createElement("div");
+                div.className = "tile" + (tile.is_joker ? " joker-tile" : "");
+                if (selectedTile === i) div.classList.add("selected");
+
+                const dot = document.createElement("div");
+                dot.className = "tile-dot " + (tile.is_joker ? "dot-joker" : dotMap[tile.color] || "");
+                div.appendChild(dot);
+
+                const num = document.createElement("div");
+                num.className = "tile-number " + (tile.is_joker ? "joker" : colorMap[tile.color] || "");
+                num.textContent = tile.is_joker ? "J" : tile.number;
+                div.appendChild(num);
+
+                const idx = document.createElement("div");
+                idx.className = "tile-index";
+                idx.textContent = i + 1;
+                div.appendChild(idx);
+
+                div.onclick = () => selectTile(i);
+                container.appendChild(div);
+            });
+        }
+
+        function selectTile(i) {
+            selectedTile = selectedTile === i ? null : i;
+            if (gameData) renderTiles(gameData.hand);
+        }
+
+        function drawTile() {
+            tg.sendData(JSON.stringify({action: "cek"}));
+        }
+
+        function takeDiscard() {
+            tg.sendData(JSON.stringify({action: "cop"}));
+        }
+
+        function discardTile() {
+            if (selectedTile === null) {
+                alert("Önce bir taş seç!");
+                return;
+            }
+            tg.sendData(JSON.stringify({action: "at", tile: selectedTile + 1}));
+            selectedTile = null;
+        }
+
+        function declareOkey() {
+            tg.sendData(JSON.stringify({action: "okey"}));
+        }
+
+        // Demo data
+        gameData = {
+            hand: [
+                {color: "🔴", number: 3, is_joker: false},
+                {color: "🔵", number: 7, is_joker: false},
+                {color: "⚫", number: 11, is_joker: false},
+                {color: "🟡", number: 5, is_joker: false},
+                {color: null, number: null, is_joker: true},
+            ]
+        };
+        renderTiles(gameData.hand);
+        document.getElementById("status").textContent = "Taş seç ve at!";
+    </script>
+</body>
+</html>
