@@ -2,17 +2,19 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>101 Okey</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #1a1a2e; color: white; font-family: Arial, sans-serif; height: 100vh; overflow: hidden; }
+        body { background: #1a1a2e; color: white; font-family: Arial, sans-serif; overflow: hidden; height: 100vh; width: 100vw; }
 
-        .screen { display: none; height: 100vh; overflow-y: auto; }
+        /* EKRANLAR */
+        .screen { display: none; }
         .screen.active { display: block; }
 
         /* MENÜ */
+        #menu { height: 100vh; overflow-y: auto; background: #1a1a2e; }
         .hero { background: linear-gradient(135deg, #16213e, #0f3460); padding: 20px; text-align: center; }
         .hero h1 { font-size: 26px; color: #e94560; }
         .profile-card { background: #16213e; margin: 10px; border-radius: 12px; padding: 12px; display: flex; align-items: center; gap: 12px; }
@@ -32,213 +34,270 @@
         .menu-btn.play { background: linear-gradient(135deg, #e94560, #c0392b); grid-column: 1 / -1; padding: 20px; font-size: 16px; font-weight: bold; }
         .menu-btn.play span { font-size: 32px; }
 
-        /* OYUN TAHTASI */
+        /* OYUN - LANDSCAPE LAYOUT */
         #game {
             display: none;
-            flex-direction: column;
+            width: 100vw;
             height: 100vh;
-            background: #0a4d2e;
+            background: #1a6b8a;
+            position: relative;
+            flex-direction: column;
         }
         #game.active { display: flex; }
 
         /* ÜST BAR */
-        .game-topbar {
-            background: rgba(0,0,0,0.5);
-            padding: 6px 10px;
+        .topbar {
+            background: rgba(0,0,0,0.7);
+            padding: 4px 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 32px;
             flex-shrink: 0;
         }
-        .back-btn { background: none; border: 1px solid #e94560; color: #e94560; padding: 3px 8px; border-radius: 5px; font-size: 11px; cursor: pointer; }
-        .joker-info { font-size: 12px; color: #f39c12; }
-        .turn-info { font-size: 12px; color: #2ecc71; }
+        .topbar-btn { background: none; border: 1px solid #aaa; color: #aaa; padding: 2px 6px; border-radius: 4px; font-size: 10px; cursor: pointer; }
+        .topbar-info { font-size: 11px; color: #f39c12; }
+        .topbar-turn { font-size: 11px; color: #2ecc71; font-weight: bold; }
 
-        /* RAKİPLER */
-        .opponents {
+        /* ANA OYUN ALANI */
+        .game-main {
+            flex: 1;
             display: flex;
-            justify-content: space-around;
-            padding: 5px;
-            background: rgba(0,0,0,0.3);
-            flex-shrink: 0;
+            flex-direction: row;
+            overflow: hidden;
         }
-        .opponent {
-            text-align: center;
-            background: rgba(0,0,0,0.4);
-            border-radius: 8px;
-            padding: 5px 8px;
-            min-width: 80px;
-        }
-        .opp-name { font-size: 10px; color: #aaa; }
-        .opp-tiles { display: flex; gap: 2px; justify-content: center; margin-top: 3px; }
-        .opp-tile { width: 18px; height: 26px; background: #1565c0; border-radius: 3px; border: 1px solid #42a5f5; }
-        .opp-score { font-size: 10px; color: #f39c12; margin-top: 2px; }
 
-        /* MASA ORTASI */
-        .masa {
+        /* SOL RAKİP */
+        .sol-rakip {
+            width: 45px;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 2px;
+            gap: 3px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .rakip-isim { font-size: 8px; color: #aaa; text-align: center; writing-mode: vertical-rl; transform: rotate(180deg); }
+        .rakip-tas-dikey { display: flex; flex-direction: column; gap: 2px; }
+        .arka-tas { width: 20px; height: 28px; background: #1565c0; border-radius: 3px; border: 1px solid #42a5f5; }
+        .rakip-skor { font-size: 8px; color: #f39c12; }
+
+        /* SAĞ RAKİP */
+        .sag-rakip {
+            width: 45px;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 2px;
+            gap: 3px;
+            border-left: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* ORTA TAHTA */
+        .orta-tahta {
             flex: 1;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
             position: relative;
-            background: radial-gradient(ellipse, #1a6b3c, #0a4d2e);
         }
-        .masa-center {
+
+        /* ÜST RAKİP */
+        .ust-rakip {
             background: rgba(0,0,0,0.3);
-            border-radius: 15px;
-            padding: 10px;
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-        .deste-pile {
-            width: 50px; height: 70px;
-            background: #1565c0;
-            border-radius: 6px;
-            border: 2px solid #42a5f5;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            font-size: 10px;
-            color: #aaa;
-            text-align: center;
+            gap: 3px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 5px;
         }
-        .cop-pile {
-            width: 50px; height: 70px;
-            background: #424242;
-            border-radius: 6px;
-            border: 2px dashed #757575;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+        .ust-rakip-isim { font-size: 9px; color: #aaa; margin-right: 5px; }
+
+        /* MASA ALANI */
+        .masa-alani {
+            flex: 1;
+            background: radial-gradient(ellipse, #1a8a5a, #0d5c3a);
             position: relative;
-        }
-        .cop-tile {
-            width: 46px; height: 66px;
-            border-radius: 5px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #f5e6c8;
         }
-        .cop-tile .t-num { font-size: 18px; font-weight: bold; }
-        .cop-tile .t-dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 2px; }
 
-        /* AÇIK GRUPLAR */
-        .acik-gruplar {
-            width: 100%;
-            padding: 3px 5px;
-            background: rgba(0,0,0,0.2);
-            min-height: 45px;
+        /* AÇIK GRUPLAR ALANI */
+        .acik-alan {
+            flex: 1;
             display: flex;
-            gap: 5px;
-            overflow-x: auto;
-            flex-shrink: 0;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 4px;
+            padding: 5px;
+            overflow-y: auto;
         }
+
         .acik-grup {
             display: flex;
             gap: 2px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 5px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
             padding: 3px;
-            min-width: 30px;
-            min-height: 40px;
-            border: 1px dashed rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
         }
         .acik-grup.gecerli { border-color: #2ecc71; }
         .acik-grup.gecersiz { border-color: #e74c3c; }
 
-        /* EL TAŞLARI */
-        .el-bolumu {
-            background: rgba(0,0,0,0.5);
-            padding: 5px;
-            flex-shrink: 0;
-        }
-        .el-info {
+        /* ORTADA DESTE VE ÇÖP */
+        .merkez {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             display: flex;
-            justify-content: space-between;
-            font-size: 10px;
+            gap: 10px;
+            align-items: center;
+            background: rgba(0,0,0,0.4);
+            border-radius: 10px;
+            padding: 8px;
+        }
+        .pile-label { font-size: 8px; color: #aaa; text-align: center; margin-bottom: 3px; }
+        .deste {
+            width: 40px; height: 56px;
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            border-radius: 5px;
+            border: 2px solid #42a5f5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
             color: #aaa;
-            margin-bottom: 3px;
-            padding: 0 3px;
         }
-        .el-taslar {
+        .cop {
+            width: 40px; height: 56px;
+            background: #333;
+            border-radius: 5px;
+            border: 2px dashed #666;
+            cursor: pointer;
             display: flex;
-            gap: 3px;
-            overflow-x: auto;
-            padding-bottom: 3px;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* TAŞ STİLİ */
-        .tas {
-            width: 42px; height: 58px;
-            background: #f5e6c8;
+        /* BUTONLAR SAĞ PANEL */
+        .sag-panel {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .panel-btn {
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 5px 8px;
             border-radius: 5px;
-            border: 2px solid #ccc;
+            font-size: 9px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .panel-btn.yesil { border-color: #2ecc71; color: #2ecc71; }
+        .panel-btn.kirmizi { border-color: #e74c3c; color: #e74c3c; }
+        .panel-btn.mor { border-color: #9b59b6; color: #9b59b6; }
+        .panel-btn.turuncu { border-color: #e67e22; color: #e67e22; }
+
+        /* EL KISMI - ALT */
+        .el-kismi {
+            background: rgba(0,0,0,0.5);
+            flex-shrink: 0;
+        }
+        .el-ust-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 8px;
+            font-size: 9px;
+            color: #aaa;
+        }
+        .el-taslar-row {
+            display: flex;
+            gap: 3px;
+            padding: 4px 5px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        /* TAŞ */
+        .tas {
+            width: 36px; height: 50px;
+            background: #f5e6c8;
+            border-radius: 4px;
+            border: 1.5px solid #ccc;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             flex-shrink: 0;
-            transition: transform 0.15s;
             position: relative;
+            transition: transform 0.15s;
         }
-        .tas.secili { border-color: #e94560; transform: translateY(-8px); box-shadow: 0 4px 10px rgba(233,69,96,0.6); }
+        .tas.secili { border-color: #e94560; transform: translateY(-8px); box-shadow: 0 3px 8px rgba(233,69,96,0.7); }
         .tas.joker-tas { background: #e8d5ff; border-color: #9b59b6; }
-        .tas.joker-isaret { box-shadow: 0 0 6px gold; border-color: gold; }
-        .t-dot { width: 9px; height: 9px; border-radius: 50%; margin-bottom: 2px; }
-        .t-num { font-size: 18px; font-weight: bold; line-height: 1; }
-        .t-idx { font-size: 8px; color: #999; position: absolute; bottom: 2px; }
+        .tas.joker-isaret { box-shadow: 0 0 5px gold; border-color: gold; }
+        .t-dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 1px; }
+        .t-num { font-size: 16px; font-weight: bold; line-height: 1; }
+        .t-idx { font-size: 7px; color: #999; position: absolute; bottom: 1px; }
 
-        .kirmizi { color: #e74c3c; } .mavi { color: #3498db; }
+        .kirmizi { color: #e74c3c; } .mavi { color: #2980b9; }
         .siyah { color: #2c3e50; } .sari { color: #d4ac0d; }
-        .dot-k { background: #e74c3c; } .dot-m { background: #3498db; }
+        .dot-k { background: #e74c3c; } .dot-m { background: #2980b9; }
         .dot-s { background: #2c3e50; } .dot-y { background: #d4ac0d; }
         .dot-j { background: #9b59b6; }
 
-        /* ALT AKSİYON BARLARI */
-        .aksiyon-bar {
-            background: rgba(0,0,0,0.6);
-            padding: 5px;
-            display: flex;
-            gap: 5px;
-            flex-shrink: 0;
-        }
-        .aks-btn {
-            flex: 1; padding: 8px 3px;
-            border: none; border-radius: 7px;
-            color: white; font-size: 11px;
-            font-weight: bold; cursor: pointer;
-        }
-        .btn-cek { background: #27ae60; }
-        .btn-cop { background: #e67e22; }
-        .btn-at { background: #e74c3c; }
-        .btn-ac { background: #9b59b6; }
-        .btn-grp { background: #2980b9; }
-
         /* SIRALAMA */
+        #ranking { height: 100vh; overflow-y: auto; background: #1a1a2e; }
         .rank-header { background: linear-gradient(135deg, #16213e, #0f3460); padding: 15px; text-align: center; }
         .rank-header h2 { font-size: 20px; color: #f39c12; }
         .rank-item { background: #16213e; margin: 5px 10px; border-radius: 10px; padding: 10px; display: flex; align-items: center; gap: 10px; }
-        .rank-num { font-size: 16px; font-weight: bold; width: 25px; color: #aaa; }
+        .rank-num { font-size: 16px; font-weight: bold; width: 25px; }
         .rank-num.gold { color: #f39c12; } .rank-num.silver { color: #bdc3c7; } .rank-num.bronze { color: #cd6133; }
-        .rank-av { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #e94560, #533483); display: flex; align-items: center; justify-content: center; font-size: 15px; }
+        .rank-av { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #e94560, #533483); display: flex; align-items: center; justify-content: center; }
         .rank-info { flex: 1; }
         .rank-info h3 { font-size: 13px; }
         .rank-info p { font-size: 10px; color: #aaa; }
         .rank-score { font-size: 14px; color: #f39c12; font-weight: bold; }
 
         /* NAV */
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #16213e; display: flex; justify-content: space-around; padding: 6px 0; border-top: 1px solid #0f3460; z-index: 100; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #16213e; display: flex; justify-content: space-around; padding: 6px 0; border-top: 1px solid #0f3460; z-index: 200; }
         .nav-btn { background: none; border: none; color: #aaa; font-size: 9px; cursor: pointer; text-align: center; }
         .nav-btn span { font-size: 20px; display: block; }
         .nav-btn.active { color: #e94560; }
         .pb { padding-bottom: 55px; }
+
+        /* SKOR TABLOSU */
+        .skor-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 300;
+            align-items: center;
+            justify-content: center;
+        }
+        .skor-overlay.goster { display: flex; }
+        .skor-kart {
+            background: #16213e;
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 250px;
+        }
+        .skor-kart h2 { text-align: center; color: #f39c12; margin-bottom: 15px; }
+        .skor-satir { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #0f3460; font-size: 13px; }
+        .kapat-btn { background: #e94560; border: none; color: white; padding: 8px 20px; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -269,78 +328,102 @@
     </div>
 </div>
 
-<!-- OYUN TAHTASI -->
+<!-- OYUN -->
 <div id="game" class="screen">
-    <div class="game-topbar">
-        <button class="back-btn" onclick="showScreen('menu')">← Menü</button>
-        <span class="joker-info" id="joker-bar">🃏 -</span>
-        <span class="turn-info" id="turn-info">Sıra: Sen</span>
+    <div class="topbar">
+        <button class="topbar-btn" onclick="showScreen('menu')">← Menü</button>
+        <span class="topbar-info" id="joker-bar">🃏 Joker: -</span>
+        <span class="topbar-turn" id="turn-info">Sıra: Sen ✅</span>
     </div>
 
-    <div class="opponents">
-        <div class="opponent">
-            <div class="opp-name">🤖 Bot Ali</div>
-            <div class="opp-tiles" id="opp1-tiles"></div>
-            <div class="opp-score">14 taş</div>
+    <div class="game-main">
+        <!-- SOL RAKİP -->
+        <div class="sol-rakip">
+            <span class="rakip-isim">🤖 Bot Ali</span>
+            <div class="rakip-tas-dikey" id="sol-taslar"></div>
+            <span class="rakip-skor">14 taş</span>
         </div>
-        <div class="opponent">
-            <div class="opp-name">🤖 Bot Ayşe</div>
-            <div class="opp-tiles" id="opp2-tiles"></div>
-            <div class="opp-score">14 taş</div>
-        </div>
-        <div class="opponent">
-            <div class="opp-name">🤖 Bot Mehmet</div>
-            <div class="opp-tiles" id="opp3-tiles"></div>
-            <div class="opp-score">14 taş</div>
-        </div>
-    </div>
 
-    <div class="masa">
-        <div class="masa-center">
-            <div>
-                <div style="font-size:9px;color:#aaa;text-align:center;margin-bottom:3px">DESTE</div>
-                <div class="deste-pile" onclick="tasCek()" id="deste-pile">
-                    <div>📥<br><span id="deste-sayi">84</span></div>
+        <!-- ORTA -->
+        <div class="orta-tahta">
+            <!-- ÜST RAKİP -->
+            <div class="ust-rakip">
+                <span class="ust-rakip-isim">🤖 Bot Ayşe</span>
+                <div id="ust-taslar" style="display:flex;gap:2px"></div>
+                <span style="font-size:9px;color:#f39c12;margin-left:5px">14 taş</span>
+            </div>
+
+            <!-- MASA -->
+            <div class="masa-alani">
+                <!-- AÇIK GRUPLAR -->
+                <div class="acik-alan" id="acik-alan">
+                    <div style="font-size:9px;color:rgba(255,255,255,0.4);padding:5px">Açık gruplar burada görünür...</div>
+                </div>
+
+                <!-- DESTE VE ÇÖP - ORTA -->
+                <div class="merkez">
+                    <div>
+                        <div class="pile-label">DESTE</div>
+                        <div class="deste" onclick="tasCek()" id="deste">
+                            <span id="deste-n">84</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="pile-label">ÇÖP</div>
+                        <div class="cop" id="cop-pile" onclick="copAl()">
+                            <div id="cop-icerik" style="font-size:9px;color:#666">Boş</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SAĞ PANEL BUTONLAR -->
+                <div class="sag-panel">
+                    <button class="panel-btn yesil" onclick="tasCek()">📥 Çek</button>
+                    <button class="panel-btn turuncu" onclick="copAl()">♻️ Çöp</button>
+                    <button class="panel-btn kirmizi" onclick="tasAt()">🗑 At</button>
+                    <button class="panel-btn" onclick="grubaEkle()">📦 Grup</button>
+                    <button class="panel-btn mor" onclick="elAc()">🏆 El Aç</button>
+                    <button class="panel-btn" onclick="seriDiz()">↕️ Seri Diz</button>
+                    <button class="panel-btn" onclick="ciftDiz()">= Çift Diz</button>
                 </div>
             </div>
-            <div>
-                <div style="font-size:9px;color:#aaa;text-align:center;margin-bottom:3px">ÇÖP</div>
-                <div class="cop-pile" onclick="copAl()" id="cop-pile">
-                    <div style="color:#aaa;font-size:10px" id="cop-bos">Boş</div>
-                </div>
-            </div>
         </div>
 
-        <div class="acik-gruplar" id="acik-gruplar">
-            <div style="font-size:9px;color:#aaa;padding:3px;white-space:nowrap">Açık gruplar burada görünür</div>
+        <!-- SAĞ RAKİP -->
+        <div class="sag-rakip">
+            <span class="rakip-isim">🤖 Bot Mehmet</span>
+            <div class="rakip-tas-dikey" id="sag-taslar"></div>
+            <span class="rakip-skor">14 taş</span>
         </div>
     </div>
 
-    <div class="el-bolumu">
-        <div class="el-info">
+    <!-- EL -->
+    <div class="el-kismi">
+        <div class="el-ust-bar">
             <span>🎴 Elindeki Taşlar</span>
-            <span id="el-puan-info">0 puan</span>
+            <span id="el-puan">0 puan</span>
         </div>
-        <div class="el-taslar" id="el-taslar"></div>
-    </div>
-
-    <div class="aksiyon-bar">
-        <button class="aks-btn btn-cek" onclick="tasCek()">📥 Çek</button>
-        <button class="aks-btn btn-cop" onclick="copAl()">♻️ Çöp</button>
-        <button class="aks-btn btn-at" onclick="tasAt()">🗑 At</button>
-        <button class="aks-btn btn-grp" onclick="grubaEkle()">📦 Grup</button>
-        <button class="aks-btn btn-ac" onclick="elAc()">🏆 Aç</button>
+        <div class="el-taslar-row" id="el-taslar"></div>
     </div>
 </div>
 
 <!-- SIRALAMA -->
 <div id="ranking" class="screen pb">
-    <div class="rank-header"><h2>🏆 Sıralama</h2><p style="color:#aaa;font-size:11px">Bu haftanın en iyileri</p></div>
+    <div class="rank-header"><h2>🏆 Sıralama</h2></div>
     <div class="rank-item"><div class="rank-num gold">1</div><div class="rank-av">👑</div><div class="rank-info"><h3>Ahmet K.</h3><p>Seviye 45</p></div><div class="rank-score">12,500</div></div>
     <div class="rank-item"><div class="rank-num silver">2</div><div class="rank-av">🥈</div><div class="rank-info"><h3>Fatma S.</h3><p>Seviye 38</p></div><div class="rank-score">10,200</div></div>
     <div class="rank-item"><div class="rank-num bronze">3</div><div class="rank-av">🥉</div><div class="rank-info"><h3>Mehmet Y.</h3><p>Seviye 32</p></div><div class="rank-score">8,900</div></div>
     <div class="rank-item"><div class="rank-num">4</div><div class="rank-av">😎</div><div class="rank-info"><h3>Ayşe T.</h3><p>Seviye 28</p></div><div class="rank-score">7,400</div></div>
     <div class="rank-item"><div class="rank-num">5</div><div class="rank-av">🎮</div><div class="rank-info"><h3>Ali R.</h3><p>Seviye 25</p></div><div class="rank-score">6,800</div></div>
+</div>
+
+<!-- SKOR OVERLAY -->
+<div class="skor-overlay" id="skor-overlay">
+    <div class="skor-kart">
+        <h2 id="skor-baslik">El Sonucu</h2>
+        <div id="skor-icerik"></div>
+        <button class="kapat-btn" onclick="document.getElementById('skor-overlay').classList.remove('goster')">Tamam</button>
+    </div>
 </div>
 
 <div class="bottom-nav">
@@ -353,122 +436,151 @@
 <script>
 const tg = window.Telegram.WebApp;
 tg.expand();
-if (tg.initDataUnsafe?.user) {
-    document.getElementById("username").textContent = tg.initDataUnsafe.user.first_name;
-}
+if (tg.initDataUnsafe?.user) document.getElementById("username").textContent = tg.initDataUnsafe.user.first_name;
 
 const RENKLER = {"🔴":"kirmizi","🔵":"mavi","⚫":"siyah","🟡":"sari"};
 const DOTLAR = {"🔴":"dot-k","🔵":"dot-m","⚫":"dot-s","🟡":"dot-y"};
 const RENK_LIST = ["🔴","🔵","⚫","🟡"];
 
-let el = [], gruplar = [], jokerTas = null, seciliIdx = null, tasCekti = true;
+let el = [], gruplar = [], jokerTas = null, seciliIdx = null, tasCekti = true, copTas = null;
 
 function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    const navMap = {menu:0, game:1, ranking:2};
-    if (navMap[id] !== undefined) document.querySelectorAll('.nav-btn')[navMap[id]].classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', i === {menu:0,game:1,ranking:2}[id]));
     if (id === 'game') oyunBaslat();
 }
 
-function rasgele() {
-    return {renk: RENK_LIST[Math.floor(Math.random()*4)], sayi: Math.floor(Math.random()*13)+1, joker: false};
-}
+function rasgele() { return {renk: RENK_LIST[Math.floor(Math.random()*4)], sayi: Math.floor(Math.random()*13)+1, joker: false}; }
 
 function oyunBaslat() {
     el = Array.from({length:15}, rasgele);
     gruplar = [];
     seciliIdx = null;
     tasCekti = true;
+    copTas = null;
     const ind = rasgele();
     jokerTas = {renk: ind.renk, sayi: (ind.sayi % 13) + 1};
     document.getElementById("joker-bar").textContent = `🃏 ${jokerTas.renk}${jokerTas.sayi}`;
+
     // Rakip taşları
-    ['opp1','opp2','opp3'].forEach(id => {
-        const div = document.getElementById(id+'-tiles');
-        div.innerHTML = Array.from({length:8}, () => '<div class="opp-tile"></div>').join('');
+    ['sol','ust','sag'].forEach(k => {
+        const d = document.getElementById(k+'-taslar');
+        const n = k === 'ust' ? 10 : 7;
+        d.innerHTML = Array.from({length:n}, () => `<div class="arka-tas"></div>`).join('');
     });
     render();
 }
 
-function isJoker(t) {
-    return t.joker || (jokerTas && t.renk === jokerTas.renk && t.sayi === jokerTas.sayi);
-}
-
+function isJoker(t) { return t.joker || (jokerTas && t.renk === jokerTas.renk && t.sayi === jokerTas.sayi); }
 function tasPuan(t) { return isJoker(t) ? 30 : t.sayi; }
 
-function tasHTML(t, idx, src) {
+function tasEl(t, idx) {
     const j = isJoker(t);
-    const renk = j ? "" : RENKLER[t.renk] || "";
-    const dot = j ? "dot-j" : DOTLAR[t.renk] || "";
-    const seciliClass = (src === 'el' && seciliIdx === idx) ? 'secili' : '';
-    return `<div class="tas ${j?'joker-tas':''} ${j?'joker-isaret':''} ${seciliClass}" onclick="tasSec(${idx})">
-        <div class="t-dot ${dot}"></div>
-        <div class="t-num ${renk}">${j?'J':t.sayi}</div>
+    return `<div class="tas ${j?'joker-tas':''} ${j?'joker-isaret':''} ${seciliIdx===idx?'secili':''}" onclick="tasSec(${idx})">
+        <div class="t-dot ${j?'dot-j':DOTLAR[t.renk]||''}"></div>
+        <div class="t-num ${j?'':RENKLER[t.renk]||''}">${j?'J':t.sayi}</div>
         <div class="t-idx">${idx+1}</div>
     </div>`;
 }
 
+function tasMini(t) {
+    const j = isJoker(t);
+    return `<div class="tas" style="width:28px;height:38px;" >
+        <div class="t-dot" style="width:6px;height:6px;${j?'background:#9b59b6':'background:'+({kirmizi:'#e74c3c',mavi:'#2980b9',siyah:'#2c3e50',sari:'#d4ac0d'}[RENKLER[t.renk]]||'')}"></div>
+        <div class="t-num" style="font-size:12px;${j?'color:#9b59b6':'color:'+({kirmizi:'#e74c3c',mavi:'#2980b9',siyah:'#2c3e50',sari:'#d4ac0d'}[RENKLER[t.renk]]||'')}">${j?'J':t.sayi}</div>
+    </div>`;
+}
+
 function render() {
-    // El
-    document.getElementById("el-taslar").innerHTML = el.map((t,i) => tasHTML(t,i,'el')).join('');
-    const ep = el.reduce((s,t) => s + tasPuan(t), 0);
-    document.getElementById("el-puan-info").textContent = ep + ' puan';
+    document.getElementById("el-taslar").innerHTML = el.map((t,i) => tasEl(t,i)).join('');
+    document.getElementById("el-puan").textContent = el.reduce((s,t)=>s+tasPuan(t),0) + ' puan';
 
     // Açık gruplar
-    const ag = document.getElementById("acik-gruplar");
+    const aa = document.getElementById("acik-alan");
     if (gruplar.length === 0) {
-        ag.innerHTML = '<div style="font-size:9px;color:#aaa;padding:5px">Grup oluşturmak için taş seç → 📦 Grup bas</div>';
+        aa.innerHTML = '<div style="font-size:9px;color:rgba(255,255,255,0.4);padding:5px">Grup oluşturmak için taş seç → 📦 Grup</div>';
     } else {
-        ag.innerHTML = gruplar.map((g,gi) => {
-            const gecerli = grupGecerli(g);
-            const puan = g.reduce((s,t) => s+tasPuan(t),0);
-            return `<div class="acik-grup ${gecerli?'gecerli':'gecersiz'}">
-                ${g.map((t,ti) => tasHTML(t,ti,'g'+gi)).join('')}
-                <div style="font-size:8px;color:${gecerli?'#2ecc71':'#e74c3c'};writing-mode:vertical-rl;padding:2px">${puan}p</div>
+        aa.innerHTML = gruplar.map((g,gi) => {
+            const gec = grupGecerli(g);
+            const p = g.reduce((s,t)=>s+tasPuan(t),0);
+            return `<div class="acik-grup ${gec?'gecerli':'gecersiz'}" onclick="grupSecToggle(${gi})">
+                ${g.map(t => tasMini(t)).join('')}
+                <div style="font-size:7px;color:${gec?'#2ecc71':'#e74c3c'};writing-mode:vertical-rl;padding:1px">${p}p</div>
             </div>`;
         }).join('');
     }
 
     // Çöp
-    const copEl = document.getElementById("cop-pile");
+    if (copTas) {
+        const j = isJoker(copTas);
+        document.getElementById("cop-icerik").innerHTML = `<div style="width:36px;height:50px;background:#f5e6c8;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <div style="width:7px;height:7px;border-radius:50%;background:${j?'#9b59b6':({kirmizi:'#e74c3c',mavi:'#2980b9',siyah:'#2c3e50',sari:'#d4ac0d'}[RENKLER[copTas.renk]]||'')}"></div>
+            <div style="font-size:14px;font-weight:bold;color:${j?'#9b59b6':({kirmizi:'#e74c3c',mavi:'#2980b9',siyah:'#2c3e50',sari:'#d4ac0d'}[RENKLER[copTas.renk]]||'')}">
+                ${j?'J':copTas.sayi}</div>
+        </div>`;
+    } else {
+        document.getElementById("cop-icerik").innerHTML = '<span style="font-size:9px;color:#666">Boş</span>';
+    }
 }
 
-function tasSec(idx) {
-    seciliIdx = seciliIdx === idx ? null : idx;
-    render();
-}
+function tasSec(idx) { seciliIdx = seciliIdx === idx ? null : idx; render(); }
+function grupSecToggle(gi) { /* ileride grup taşı seçimi */ }
 
 function tasCek() {
-    if (tasCekti) { showMsg("Zaten taş çektin! Önce taş at."); return; }
+    if (tasCekti) { msg("Zaten taş çektin! Önce taş at."); return; }
     el.push(rasgele());
     tasCekti = true;
     render();
 }
 
 function copAl() {
-    if (tasCekti) { showMsg("Zaten taş çektin!"); return; }
-    el.push(rasgele());
+    if (tasCekti) { msg("Zaten taş çektin!"); return; }
+    if (!copTas) { msg("Çöp boş!"); return; }
+    el.push(copTas);
+    copTas = null;
     tasCekti = true;
     render();
 }
 
 function tasAt() {
-    if (!tasCekti) { showMsg("Önce taş çek!"); return; }
-    if (seciliIdx === null) { showMsg("Atmak için bir taş seç!"); return; }
-    el.splice(seciliIdx, 1);
+    if (!tasCekti) { msg("Önce taş çek!"); return; }
+    if (seciliIdx === null) { msg("Atmak için bir taş seç!"); return; }
+    copTas = el.splice(seciliIdx, 1)[0];
     seciliIdx = null;
     tasCekti = false;
     render();
-    setTimeout(botTur, 1200);
+    setTimeout(botTur, 1000);
 }
 
 function grubaEkle() {
-    if (seciliIdx === null) { showMsg("Önce bir taş seç!"); return; }
-    const tas = el.splice(seciliIdx, 1)[0];
+    if (seciliIdx === null) { msg("Önce bir taş seç!"); return; }
+    const t = el.splice(seciliIdx, 1)[0];
     if (gruplar.length === 0) gruplar.push([]);
-    gruplar[gruplar.length-1].push(tas);
+    gruplar[gruplar.length-1].push(t);
+    seciliIdx = null;
+    render();
+}
+
+function seriDiz() {
+    // Seçili taşı yeni seri grubuna ekle
+    if (seciliIdx === null) { msg("Seri için taş seç!"); return; }
+    const t = el.splice(seciliIdx, 1)[0];
+    gruplar.push([t]);
+    seciliIdx = null;
+    render();
+}
+
+function ciftDiz() {
+    if (seciliIdx === null) { msg("Çift için taş seç!"); return; }
+    const t = el.splice(seciliIdx, 1)[0];
+    // Aynı sayılı grup ara
+    const hedef = gruplar.find(g => g.length > 0 && !isJoker(g[0]) && g[0].sayi === t.sayi && !isJoker(t));
+    if (hedef) {
+        hedef.push(t);
+    } else {
+        gruplar.push([t]);
+    }
     seciliIdx = null;
     render();
 }
@@ -478,46 +590,47 @@ function botTur() {
     setTimeout(() => {
         document.getElementById("turn-info").textContent = "Sıra: Sen ✅";
         tasCekti = false;
-    }, 800);
+    }, 700);
 }
 
 function grupGecerli(grup) {
     if (grup.length < 3) return false;
-    const jokerSayisi = grup.filter(t => isJoker(t)).length;
+    const jk = grup.filter(t => isJoker(t)).length;
     const normal = grup.filter(t => !isJoker(t));
     if (normal.length === 0) return false;
-
-    // Seri: aynı renk ardışık
-    const renkler = [...new Set(normal.map(t => t.renk))];
+    // Seri
+    const renkler = [...new Set(normal.map(t=>t.renk))];
     if (renkler.length === 1) {
-        const sayilar = normal.map(t => t.sayi).sort((a,b) => a-b);
+        const sayilar = normal.map(t=>t.sayi).sort((a,b)=>a-b);
         let bosluk = 0;
-        for (let i = 1; i < sayilar.length; i++) bosluk += sayilar[i] - sayilar[i-1] - 1;
-        if (bosluk <= jokerSayisi) return true;
+        for (let i=1;i<sayilar.length;i++) bosluk += sayilar[i]-sayilar[i-1]-1;
+        if (bosluk <= jk) return true;
     }
-
-    // Çift: aynı sayı farklı renk
-    const sayilar = [...new Set(normal.map(t => t.sayi))];
-    if (sayilar.length === 1) {
-        const farkliRenkler = new Set(normal.map(t => t.renk)).size;
-        if (farkliRenkler === normal.length && grup.length <= 4) return true;
-    }
+    // Çift
+    const sayilar2 = [...new Set(normal.map(t=>t.sayi))];
+    if (sayilar2.length === 1 && new Set(normal.map(t=>t.renk)).size === normal.length && grup.length <= 4) return true;
     return false;
 }
 
 function elAc() {
-    const gecersiz = gruplar.filter(g => !grupGecerli(g));
-    if (gruplar.length === 0) { showMsg("Önce taşları gruplara diz!"); return; }
-    if (gecersiz.length > 0) { showMsg(`❌ ${gecersiz.length} geçersiz grup var!`); return; }
-    const puan = gruplar.flat().reduce((s,t) => s+tasPuan(t), 0);
-    if (puan < 101) { showMsg(`❌ ${puan} puan! 101+ gerekli.`); return; }
-    showMsg(`🎉 El açıldı! ${puan} puan! Tebrikler!`);
-    tg.sendData(JSON.stringify({action:"el_ac", puan}));
+    const dolu = gruplar.filter(g=>g.length>0);
+    if (!dolu.length) { msg("Önce taşları gruplara diz!"); return; }
+    const gec = dolu.filter(g=>!grupGecerli(g));
+    if (gec.length) { msg(`❌ ${gec.length} geçersiz grup var!`); return; }
+    const puan = dolu.flat().reduce((s,t)=>s+tasPuan(t),0);
+    if (puan < 101) { msg(`❌ ${puan} puan! 101+ gerekli.`); return; }
+
+    document.getElementById("skor-baslik").textContent = "🎉 El Açıldı!";
+    document.getElementById("skor-icerik").innerHTML = `
+        <div class="skor-satir"><span>Açık Puan</span><span style="color:#f39c12">${puan}</span></div>
+        <div class="skor-satir"><span>Eldeki Taş</span><span>${el.length}</span></div>
+        <div class="skor-satir"><span>Sonuç</span><span style="color:#2ecc71">GALİBİYET!</span></div>
+    `;
+    document.getElementById("skor-overlay").classList.add('goster');
+    tg.sendData && tg.sendData(JSON.stringify({action:"el_ac",puan}));
 }
 
-function showMsg(msg) {
-    tg.showAlert ? tg.showAlert(msg) : alert(msg);
-}
+function msg(m) { tg.showAlert ? tg.showAlert(m) : alert(m); }
 </script>
 </body>
 </html>
