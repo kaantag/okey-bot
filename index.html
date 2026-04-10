@@ -13,31 +13,151 @@
             font-family: Arial, sans-serif;
             min-height: 100vh;
         }
-        .header {
-            background: #16213e;
-            padding: 15px;
+
+        /* ANA MENÜ */
+        .menu { display: block; }
+        .game { display: none; }
+        .ranking { display: none; }
+
+        .hero {
+            background: linear-gradient(135deg, #16213e, #0f3460);
+            padding: 30px 20px;
             text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            color: #e94560;
         }
-        .game-info {
+        .hero h1 { font-size: 32px; color: #e94560; margin-bottom: 5px; }
+        .hero p { color: #aaa; font-size: 14px; }
+
+        .profile-card {
+            background: #16213e;
+            margin: 15px;
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #533483);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+        .profile-info h2 { font-size: 18px; }
+        .profile-info p { color: #aaa; font-size: 13px; }
+        .level-bar {
             background: #0f3460;
+            height: 6px;
+            border-radius: 3px;
+            margin-top: 5px;
+            width: 150px;
+        }
+        .level-fill {
+            background: linear-gradient(90deg, #e94560, #533483);
+            height: 100%;
+            border-radius: 3px;
+            width: 65%;
+        }
+
+        .coins {
+            background: #16213e;
+            margin: 0 15px;
+            border-radius: 15px;
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-around;
+        }
+        .coin-item { text-align: center; }
+        .coin-item span { font-size: 22px; }
+        .coin-item p { font-size: 11px; color: #aaa; }
+        .coin-item h3 { font-size: 16px; color: #f39c12; }
+
+        .menu-buttons {
+            margin: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .menu-btn {
+            background: #16213e;
+            border: none;
+            border-radius: 15px;
+            padding: 20px 10px;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .menu-btn:active { transform: scale(0.95); }
+        .menu-btn span { font-size: 30px; display: block; margin-bottom: 8px; }
+        .menu-btn.play {
+            background: linear-gradient(135deg, #e94560, #c0392b);
+            grid-column: 1 / -1;
+            padding: 25px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .menu-btn.play span { font-size: 40px; }
+
+        /* SIRALAMA */
+        .ranking-header {
+            background: linear-gradient(135deg, #16213e, #0f3460);
+            padding: 20px;
+            text-align: center;
+        }
+        .ranking-header h2 { font-size: 24px; color: #f39c12; }
+        .rank-item {
+            background: #16213e;
+            margin: 8px 15px;
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .rank-num { font-size: 20px; font-weight: bold; width: 30px; color: #aaa; }
+        .rank-num.gold { color: #f39c12; }
+        .rank-num.silver { color: #bdc3c7; }
+        .rank-num.bronze { color: #cd6133; }
+        .rank-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e94560, #533483);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .rank-info { flex: 1; }
+        .rank-info h3 { font-size: 15px; }
+        .rank-info p { font-size: 12px; color: #aaa; }
+        .rank-score { font-size: 16px; color: #f39c12; font-weight: bold; }
+
+        /* OYUN */
+        .game-header {
+            background: #16213e;
             padding: 10px 15px;
             display: flex;
             justify-content: space-between;
-            font-size: 14px;
+            align-items: center;
         }
-        .joker-info {
-            background: #533483;
-            padding: 8px 15px;
-            text-align: center;
+        .back-btn {
+            background: none;
+            border: none;
+            color: #e94560;
             font-size: 16px;
+            cursor: pointer;
         }
         .tiles-container {
-            padding: 15px;
+            padding: 10px;
             overflow-x: auto;
             white-space: nowrap;
+            background: #0f3460;
         }
         .tile {
             display: inline-block;
@@ -53,54 +173,34 @@
             vertical-align: top;
             transition: transform 0.2s;
         }
-        .tile:active { transform: scale(0.95); }
         .tile.selected {
             border: 3px solid #e94560;
             transform: translateY(-10px);
         }
-        .tile.joker-tile { background: #e8d5ff; border-color: #9b59b6; }
-        .tile-number {
-            font-size: 22px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
+        .tile.joker-tile { background: #e8d5ff; }
+        .tile-number { font-size: 22px; font-weight: bold; margin-top: 20px; }
         .tile-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            position: absolute;
-            top: 8px;
-            left: 50%;
+            width: 12px; height: 12px; border-radius: 50%;
+            position: absolute; top: 8px; left: 50%;
             transform: translateX(-50%);
         }
-        .tile-index {
-            font-size: 10px;
-            color: #999;
-            position: absolute;
-            bottom: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .red { color: #e74c3c; }
-        .blue { color: #3498db; }
-        .black { color: #2c3e50; }
-        .yellow { color: #f39c12; }
-        .dot-red { background: #e74c3c; }
-        .dot-blue { background: #3498db; }
-        .dot-black { background: #2c3e50; }
-        .dot-yellow { background: #f39c12; }
+        .tile-index { font-size: 10px; color: #999; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); }
+        .red { color: #e74c3c; } .blue { color: #3498db; }
+        .black { color: #2c3e50; } .yellow { color: #f39c12; }
+        .dot-red { background: #e74c3c; } .dot-blue { background: #3498db; }
+        .dot-black { background: #2c3e50; } .dot-yellow { background: #f39c12; }
         .dot-joker { background: #9b59b6; }
-        .actions {
-            padding: 15px;
+        .game-actions {
+            padding: 10px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
+            gap: 8px;
         }
         .btn {
             padding: 12px;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 15px;
             cursor: pointer;
             font-weight: bold;
         }
@@ -108,119 +208,231 @@
         .btn-discard { background: #e74c3c; color: white; }
         .btn-trash { background: #e67e22; color: white; }
         .btn-declare { background: #9b59b6; color: white; }
-        .status {
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
             background: #16213e;
-            padding: 10px 15px;
-            text-align: center;
-            font-size: 14px;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #0f3460;
+        }
+        .nav-btn {
+            background: none;
+            border: none;
             color: #aaa;
+            font-size: 11px;
+            cursor: pointer;
+            text-align: center;
         }
-        .discard-pile {
-            padding: 10px 15px;
-            font-size: 14px;
-        }
-        .discard-pile span { color: #aaa; }
+        .nav-btn span { font-size: 24px; display: block; }
+        .nav-btn.active { color: #e94560; }
+        .pb { padding-bottom: 70px; }
     </style>
 </head>
 <body>
-    <div class="header">🎮 101 Okey</div>
-    <div class="game-info">
-        <span id="turn-info">Sıra: Yükleniyor...</span>
-        <span id="tile-count">Deste: -</span>
+
+<!-- ANA MENÜ -->
+<div class="menu pb">
+    <div class="hero">
+        <h1>🎮 101 Okey</h1>
+        <p>Türkiye'nin en iyi okey botu</p>
     </div>
-    <div class="joker-info" id="joker-info">🃏 Joker: -</div>
-    <div class="status" id="status">Oyun bekleniyor...</div>
-    <div class="discard-pile">
-        <span>Çöp: </span>
-        <span id="discard-top">-</span>
+
+    <div class="profile-card">
+        <div class="avatar">👤</div>
+        <div class="profile-info">
+            <h2 id="username">Oyuncu</h2>
+            <p>Seviye 12 • 1,250 XP</p>
+            <div class="level-bar"><div class="level-fill"></div></div>
+        </div>
+    </div>
+
+    <div class="coins">
+        <div class="coin-item">
+            <span>🪙</span>
+            <h3>5,000</h3>
+            <p>Altın</p>
+        </div>
+        <div class="coin-item">
+            <span>💎</span>
+            <h3>120</h3>
+            <p>Elmas</p>
+        </div>
+        <div class="coin-item">
+            <span>🏆</span>
+            <h3>48</h3>
+            <p>Galibiyet</p>
+        </div>
+    </div>
+
+    <div class="menu-buttons">
+        <button class="menu-btn play" onclick="showGame()">
+            <span>🎯</span>OYNA
+        </button>
+        <button class="menu-btn" onclick="showRanking()">
+            <span>🏆</span>Sıralama
+        </button>
+        <button class="menu-btn">
+            <span>👥</span>Arkadaşlar
+        </button>
+        <button class="menu-btn">
+            <span>🎁</span>Günlük Ödül
+        </button>
+        <button class="menu-btn">
+            <span>📺</span>Video İzle
+        </button>
+        <button class="menu-btn">
+            <span>⚙️</span>Ayarlar
+        </button>
+    </div>
+</div>
+
+<!-- SIRALAMA -->
+<div class="ranking pb" style="display:none">
+    <div class="ranking-header">
+        <h2>🏆 Sıralama Tablosu</h2>
+        <p style="color:#aaa;font-size:13px">Bu haftanın en iyileri</p>
+    </div>
+    <div class="rank-item">
+        <div class="rank-num gold">1</div>
+        <div class="rank-avatar">👑</div>
+        <div class="rank-info"><h3>Ahmet K.</h3><p>Seviye 45</p></div>
+        <div class="rank-score">12,500</div>
+    </div>
+    <div class="rank-item">
+        <div class="rank-num silver">2</div>
+        <div class="rank-avatar">🥈</div>
+        <div class="rank-info"><h3>Fatma S.</h3><p>Seviye 38</p></div>
+        <div class="rank-score">10,200</div>
+    </div>
+    <div class="rank-item">
+        <div class="rank-num bronze">3</div>
+        <div class="rank-avatar">🥉</div>
+        <div class="rank-info"><h3>Mehmet Y.</h3><p>Seviye 32</p></div>
+        <div class="rank-score">8,900</div>
+    </div>
+    <div class="rank-item">
+        <div class="rank-num">4</div>
+        <div class="rank-avatar">😎</div>
+        <div class="rank-info"><h3>Ayşe T.</h3><p>Seviye 28</p></div>
+        <div class="rank-score">7,400</div>
+    </div>
+    <div class="rank-item">
+        <div class="rank-num">5</div>
+        <div class="rank-avatar">🎮</div>
+        <div class="rank-info"><h3>Ali R.</h3><p>Seviye 25</p></div>
+        <div class="rank-score">6,800</div>
+    </div>
+</div>
+
+<!-- OYUN -->
+<div class="game" style="display:none">
+    <div class="game-header">
+        <button class="back-btn" onclick="showMenu()">← Geri</button>
+        <span id="turn-info">Sıra: -</span>
+        <span id="joker-info">🃏 -</span>
     </div>
     <div class="tiles-container" id="tiles"></div>
-    <div class="actions">
+    <div class="game-actions">
         <button class="btn btn-draw" onclick="drawTile()">📥 Taş Çek</button>
         <button class="btn btn-trash" onclick="takeDiscard()">♻️ Çöpten Al</button>
         <button class="btn btn-discard" onclick="discardTile()">🗑 Taş At</button>
         <button class="btn btn-declare" onclick="declareOkey()">🏆 Okey!</button>
     </div>
+</div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
+<!-- ALT NAVİGASYON -->
+<div class="bottom-nav">
+    <button class="nav-btn active" onclick="showMenu()">
+        <span>🏠</span>Ana Menü
+    </button>
+    <button class="nav-btn" onclick="showGame()">
+        <span>🎮</span>Oyun
+    </button>
+    <button class="nav-btn" onclick="showRanking()">
+        <span>🏆</span>Sıralama
+    </button>
+    <button class="nav-btn">
+        <span>👤</span>Profil
+    </button>
+</div>
 
-        let selectedTile = null;
-        let gameData = null;
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
 
-        const colorMap = {
-            "🔴": "red", "🔵": "blue", "⚫": "black", "🟡": "yellow"
-        };
-        const dotMap = {
-            "🔴": "dot-red", "🔵": "dot-blue", "⚫": "dot-black", "🟡": "dot-yellow"
-        };
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        document.getElementById("username").textContent = tg.initDataUnsafe.user.first_name;
+    }
 
-        function renderTiles(hand) {
-            const container = document.getElementById("tiles");
-            container.innerHTML = "";
-            hand.forEach((tile, i) => {
-                const div = document.createElement("div");
-                div.className = "tile" + (tile.is_joker ? " joker-tile" : "");
-                if (selectedTile === i) div.classList.add("selected");
+    let selectedTile = null;
+    const colorMap = {"🔴":"red","🔵":"blue","⚫":"black","🟡":"yellow"};
+    const dotMap = {"🔴":"dot-red","🔵":"dot-blue","⚫":"dot-black","🟡":"dot-yellow"};
 
-                const dot = document.createElement("div");
-                dot.className = "tile-dot " + (tile.is_joker ? "dot-joker" : dotMap[tile.color] || "");
-                div.appendChild(dot);
+    function showMenu() {
+        document.querySelector(".menu").style.display = "block";
+        document.querySelector(".ranking").style.display = "none";
+        document.querySelector(".game").style.display = "none";
+    }
+    function showRanking() {
+        document.querySelector(".menu").style.display = "none";
+        document.querySelector(".ranking").style.display = "block";
+        document.querySelector(".game").style.display = "none";
+    }
+    function showGame() {
+        document.querySelector(".menu").style.display = "none";
+        document.querySelector(".ranking").style.display = "none";
+        document.querySelector(".game").style.display = "block";
+        loadDemoHand();
+    }
 
-                const num = document.createElement("div");
-                num.className = "tile-number " + (tile.is_joker ? "joker" : colorMap[tile.color] || "");
-                num.textContent = tile.is_joker ? "J" : tile.number;
-                div.appendChild(num);
+    function loadDemoHand() {
+        const hand = [
+            {color:"🔴",number:3,is_joker:false},
+            {color:"🔵",number:7,is_joker:false},
+            {color:"⚫",number:11,is_joker:false},
+            {color:"🟡",number:5,is_joker:false},
+            {color:"🔴",number:9,is_joker:false},
+            {color:"🔵",number:2,is_joker:false},
+            {color:null,number:null,is_joker:true},
+        ];
+        renderTiles(hand);
+    }
 
-                const idx = document.createElement("div");
-                idx.className = "tile-index";
-                idx.textContent = i + 1;
-                div.appendChild(idx);
+    function renderTiles(hand) {
+        const container = document.getElementById("tiles");
+        container.innerHTML = "";
+        hand.forEach((tile, i) => {
+            const div = document.createElement("div");
+            div.className = "tile" + (tile.is_joker ? " joker-tile" : "");
+            if (selectedTile === i) div.classList.add("selected");
+            const dot = document.createElement("div");
+            dot.className = "tile-dot " + (tile.is_joker ? "dot-joker" : dotMap[tile.color] || "");
+            div.appendChild(dot);
+            const num = document.createElement("div");
+            num.className = "tile-number " + (tile.is_joker ? "" : colorMap[tile.color] || "");
+            num.textContent = tile.is_joker ? "J" : tile.number;
+            div.appendChild(num);
+            const idx = document.createElement("div");
+            idx.className = "tile-index";
+            idx.textContent = i + 1;
+            div.appendChild(idx);
+            div.onclick = () => { selectedTile = selectedTile === i ? null : i; renderTiles(hand); };
+            container.appendChild(div);
+        });
+    }
 
-                div.onclick = () => selectTile(i);
-                container.appendChild(div);
-            });
-        }
-
-        function selectTile(i) {
-            selectedTile = selectedTile === i ? null : i;
-            if (gameData) renderTiles(gameData.hand);
-        }
-
-        function drawTile() {
-            tg.sendData(JSON.stringify({action: "cek"}));
-        }
-
-        function takeDiscard() {
-            tg.sendData(JSON.stringify({action: "cop"}));
-        }
-
-        function discardTile() {
-            if (selectedTile === null) {
-                alert("Önce bir taş seç!");
-                return;
-            }
-            tg.sendData(JSON.stringify({action: "at", tile: selectedTile + 1}));
-            selectedTile = null;
-        }
-
-        function declareOkey() {
-            tg.sendData(JSON.stringify({action: "okey"}));
-        }
-
-        // Demo data
-        gameData = {
-            hand: [
-                {color: "🔴", number: 3, is_joker: false},
-                {color: "🔵", number: 7, is_joker: false},
-                {color: "⚫", number: 11, is_joker: false},
-                {color: "🟡", number: 5, is_joker: false},
-                {color: null, number: null, is_joker: true},
-            ]
-        };
-        renderTiles(gameData.hand);
-        document.getElementById("status").textContent = "Taş seç ve at!";
-    </script>
+    function drawTile() { tg.sendData(JSON.stringify({action:"cek"})); }
+    function takeDiscard() { tg.sendData(JSON.stringify({action:"cop"})); }
+    function discardTile() {
+        if (selectedTile === null) { alert("Önce bir taş seç!"); return; }
+        tg.sendData(JSON.stringify({action:"at", tile: selectedTile + 1}));
+        selectedTile = null;
+    }
+    function declareOkey() { tg.sendData(JSON.stringify({action:"okey"})); }
+</script>
 </body>
 </html>
